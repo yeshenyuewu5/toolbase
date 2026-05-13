@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>AI Tools Blog - ToolBase</title>
+<meta name="description" content="In-depth reviews and guides on the best AI tools for writing, design, coding, video, and more.">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.navbar{background:#1e293b;border-bottom:1px solid #334155;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.navbar-brand{font-size:20px;font-weight:700;color:#38bdf8;text-decoration:none}.navbar-brand span{color:#818cf8}
+.nav-links{display:flex;gap:4px}.nav-links a{padding:8px 16px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;font-weight:500}
+.nav-links a.active{background:#38bdf8;color:#0f172a}.nav-links a:hover{background:#334155;color:#e2e8f0}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+.hero{text-align:center;padding:24px 0 20px}
+.hero h1{font-size:30px;font-weight:800;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.hero p{color:#64748b;margin-top:4px;font-size:14px}
+.cat-filter{display:flex;gap:8px;flex-wrap:wrap;justify-content:center;margin-bottom:20px}
+.cat-filter a{padding:6px 14px;border:1px solid #334155;border-radius:20px;color:#94a3b8;text-decoration:none;font-size:12px;transition:.15s}
+.cat-filter a:hover,.cat-filter a.active{border-color:#38bdf8;color:#38bdf8;background:#0c4a6e20}
+.blog-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:16px}
+.post-card{background:#1e293b;border:1px solid #334155;border-radius:12px;overflow:hidden;transition:.2s;text-decoration:none;color:#e2e8f0;display:block}
+.post-card:hover{border-color:#38bdf8;transform:translateY(-2px)}
+.post-card .body{padding:16px}
+.post-card .cat{font-size:11px;color:#38bdf8;font-weight:600;text-transform:uppercase}
+.post-card h3{font-size:15px;font-weight:600;margin:6px 0;line-height:1.4}
+.post-card .excerpt{font-size:12px;color:#64748b;line-height:1.5}
+.post-card .meta{font-size:11px;color:#475569;margin-top:8px}
+.pagination{text-align:center;margin:24px 0;display:flex;gap:8px;justify-content:center}
+.pagination a{padding:8px 14px;border:1px solid #334155;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:13px}
+.pagination a:hover{border-color:#38bdf8;color:#38bdf8}
+.right-bar{display:flex;align-items:center;gap:10px}
+.right-bar a{color:#38bdf8;text-decoration:none;font-size:13px;font-weight:600}
+.right-bar .sep{color:#475569}
+.lang-btn{padding:4px 8px;border:1px solid #334155;border-radius:6px;background:transparent;color:#94a3b8;font-size:11px;text-decoration:none}
+.lang-btn.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+.footer{text-align:center;padding:20px;color:#475569;font-size:12px;border-top:1px solid #1e293b;margin-top:32px}
+@media(max-width:640px){.blog-grid{grid-template-columns:1fr}}
+</style></head>
+<body>
+<nav class="navbar">
+<a href="/tools" class="navbar-brand">🦅 Tool<span>Base</span></a>
+<div class="nav-links"><a href="/blog" class="active">Blog</a><a href="/tools">Tools</a></div>
+<div class="nav-links">
+<a href="/tools">Tools</a><a href="/blog" class="active">Blog</a>
+</div>
+<div class="right-bar">
+<a th:href="@{/blog(lang='en')}" class="lang-btn" th:classappend="${#locale.language == 'en' ? 'active' : ''}">EN</a>
+<a th:href="@{/blog(lang='zh')}" class="lang-btn" th:classappend="${#locale.language == 'zh' ? 'active' : ''}">中文</a>
+</div>
+</nav>
+<div class="container">
+<div class="hero"><h1>AI Tools Blog</h1><p>In-depth reviews, comparisons, and guides on the latest AI tools</p></div>
+<div class="cat-filter">
+<a href="/blog" th:classappend="${currentCategory == null} ? 'active'">All</a>
+<a th:each="c : ${categories}" th:href="@{/blog(category=${c})}" th:text="${c}" th:classappend="${currentCategory == c} ? 'active'">Category</a>
+</div>
+<div class="post-grid blog-grid">
+<th:block th:each="p : ${posts}">
+<a th:href="@{/blog/{slug}(slug=${p.slug})}" class="post-card">
+<div class="body">
+<div class="cat" th:text="${p.category}">Category</div>
+<h3 th:text="${p.title}">Title</h3>
+<div class="excerpt" th:text="${p.excerpt}">Excerpt</div>
+<div class="meta"><span th:text="${#temporals.format(p.createdAt, 'MMM dd, yyyy')}">date</span> · <span th:text="${p.viewCount}">0</span> views</div>
+</div>
+</a>
+
+</th:block>
+</div>
+<div th:if="${posts.totalPages > 1}" class="pagination">
+<a th:each="i : ${#numbers.sequence(0, posts.totalPages - 1)}"
+   th:href="@{/blog(page=${i}, category=${currentCategory})}"
+   th:text="${i + 1}"
+   th:style="${i == posts.number} ? 'background:#38bdf8;color:#0f172a;font-weight:600' : ''">1</a>
+</div>
+</div>
+<div class="footer"><p>ToolBase — AI Tools Blog. Reviews, comparisons, and guides.</p></div>
+</body>
+</html>

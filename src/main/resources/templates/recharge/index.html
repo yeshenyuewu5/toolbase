@@ -1,0 +1,192 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>充值 - ToolBase</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        .navbar { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #38bdf8; text-decoration: none; }
+        .navbar-brand span { color: #818cf8; }
+        .navbar-user { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .navbar-user .balance { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 8px; color: #4ade80; font-weight: 600; }
+        .navbar-user .username { color: #94a3b8; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a { padding: 8px 16px; border-radius: 8px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .nav-links a:hover { background: #334155; color: #e2e8f0; }
+        .nav-links a.active { background: #38bdf8; color: #0f172a; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; }
+        .btn-primary { background: #38bdf8; color: #0f172a; }
+        .btn-primary:hover { background: #7dd3fc; }
+        .btn-success { background: #4ade80; color: #0f172a; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .btn-danger { background: #ef4444; color: white; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        .card-header { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #f1f5f9; }
+        .card-subtitle { font-size: 13px; color: #64748b; margin-bottom: 16px; }
+        .form-group { margin-bottom: 16px; }
+        .form-group label { display: block; font-size: 13px; font-weight: 500; color: #94a3b8; margin-bottom: 6px; }
+        .form-input { width: 100%; padding: 10px 14px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none; }
+        .form-input:focus { border-color: #38bdf8; }
+        .form-select { width: 100%; padding: 10px 14px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; }
+        .alert-success { background: #14532d; border: 1px solid #166534; color: #86efac; padding: 12px 16px; border-radius: 8px; margin-bottom: 16px; font-size: 14px; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: #14532d; color: #4ade80; }
+        .badge-warning { background: #451a03; color: #fb923c; }
+        .badge-error { background: #450a0a; color: #f87171; }
+        .badge-info { background: #0c4a6e; color: #38bdf8; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #334155; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 10px 12px; border-bottom: 1px solid #1e293b; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
+        .contact-card { background: #0f172a; border: 1px solid #334155; border-radius: 10px; padding: 16px; margin-bottom: 12px; }
+        .contact-card h4 { color: #38bdf8; font-size: 14px; margin-bottom: 8px; }
+        .contact-card p { color: #94a3b8; font-size: 13px; line-height: 1.6; }
+        .contact-card .label { color: #64748b; display: inline-block; width: 70px; }
+        .amount-options { display: grid; grid-template-columns: repeat(4, 1fr); gap: 8px; margin-bottom: 16px; }
+        .amount-btn { padding: 10px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: #e2e8f0; font-size: 14px; font-weight: 600; cursor: pointer; text-align: center; transition: all 0.15s; }
+        .amount-btn:hover, .amount-btn.selected { border-color: #38bdf8; color: #38bdf8; background: #0c4a6e30; }
+        @media (max-width: 768px) { .grid-2, .grid-3 { grid-template-columns: 1fr; } .amount-options { grid-template-columns: repeat(2, 1fr); } }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">🦅 Tool<span>Base</span></a>
+    <div class="navbar-user">
+        <div class="nav-links">
+            <a href="/dashboard">控制台</a>
+            <a href="/recharge" class="active">充值</a>
+            <a sec:authorize="hasAuthority('ADMIN')" href="/admin">管理</a>
+        </div>
+        <span class="balance">¥<span th:text="${#numbers.formatDecimal(user.balance / 100.0, 1, 2)}">0.00</span></span>
+        <span class="username" sec:authentication="name">user</span>
+        <form method="post" th:action="@{/auth/logout}" style="display:inline">
+            <button type="submit" class="btn btn-sm btn-danger">退出</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div th:if="${param.submitted}" class="alert-success">
+        ✅ 充值申请已提交！请转账后联系管理员确认，<strong>付款备注请填写你的用户名</strong>。
+    </div>
+
+    <h2 style="font-size: 22px; margin-bottom: 8px;">充值</h2>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">
+        当前余额：<span style="color:#4ade80;font-weight:700;" th:text="${#numbers.formatDecimal(user.balance / 100.0, 1, 2)} + ' ¥'">0.00</span>
+    </p>
+
+    <div class="grid-2">
+        <!-- 提交充值 -->
+        <div class="card">
+            <div class="card-header">提交充值申请</div>
+            <div class="card-subtitle">选择金额或手动输入，提交后联系管理员确认到账</div>
+
+            <div class="amount-options">
+                <div class="amount-btn" onclick="document.getElementById('amount').value=30; highlight(this)">¥30</div>
+                <div class="amount-btn" onclick="document.getElementById('amount').value=50; highlight(this)">¥50</div>
+                <div class="amount-btn" onclick="document.getElementById('amount').value=100; highlight(this)">¥100</div>
+                <div class="amount-btn" onclick="document.getElementById('amount').value=200; highlight(this)">¥200</div>
+            </div>
+
+            <form method="post" th:action="@{/recharge/submit}">
+                <div class="form-group">
+                    <label>充值金额（元）</label>
+                    <input type="number" id="amount" name="amount" class="form-input" min="1" step="1" required placeholder="最低 1 元">
+                </div>
+                <div class="form-group">
+                    <label>支付方式</label>
+                    <select name="paymentMethod" class="form-select" required>
+                        <option value="wechat">微信支付</option>
+                        <option value="alipay">支付宝</option>
+                        <option value="bank">银行转账</option>
+                        <option value="usdt">USDT</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label>你的联系方式（方便管理员联系你确认）</label>
+                    <input type="text" name="remark" class="form-input" placeholder="微信号 / 手机号 / 邮箱">
+                </div>
+                <button type="submit" class="btn btn-primary" style="width:100%;justify-content:center;">提交充值申请</button>
+            </form>
+        </div>
+
+        <!-- 管理员联系信息 -->
+        <div>
+            <div class="card" style="margin-bottom:16px;">
+                <div class="card-header" style="color:#4ade80;">📞 联系管理员确认到账</div>
+                <div class="contact-card">
+                    <h4>💬 微信</h4>
+                    <p><span class="label">微信号：</span><strong style="color:#e2e8f0;">admin_toolbase</strong></p>
+                    <p style="font-size:12px;color:#475569;margin-top:4px;">添加时请备注 "ToolBase充值"</p>
+                </div>
+                <div class="contact-card">
+                    <h4>📝 转账说明</h4>
+                    <p style="font-size:13px;">
+                        1. 提交充值申请 → 记住申请金额<br>
+                        2. 使用上面联系方式转账<br>
+                        3. <strong style="color:#fbbf24;">付款备注填写你的用户名</strong><br>
+                        4. 管理员确认后余额自动到账
+                    </p>
+                </div>
+                <div class="contact-card" style="border-color:#4ade8040;">
+                    <h4 style="color:#4ade80;">⚡ 快速到账</h4>
+                    <p style="font-size:13px;">
+                        工作日 09:00-22:00 提交，<br>
+                        通常 <strong style="color:#4ade80;">10分钟内</strong> 到账
+                    </p>
+                </div>
+            </div>
+
+            <!-- 充值记录 -->
+            <div class="card">
+                <div class="card-header">充值记录</div>
+                <div th:if="${rechargeHistory == null || #lists.isEmpty(rechargeHistory)}" class="empty-state">
+                    <h3>暂无充值记录</h3>
+                    <p>首次充值请填写左侧表单</p>
+                </div>
+                <table th:if="${rechargeHistory != null && !#lists.isEmpty(rechargeHistory)}">
+                    <thead>
+                        <tr>
+                            <th>时间</th>
+                            <th>金额</th>
+                            <th>方式</th>
+                            <th>状态</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr th:each="r : ${rechargeHistory}">
+                            <td style="color:#64748b;font-size:12px;" th:text="${#temporals.format(r.createdAt, 'MM-dd HH:mm')}">date</td>
+                            <td style="color:#4ade80;font-weight:600;" th:text="${#numbers.formatDecimal(r.amountFen / 100.0, 1, 2)} + ' ¥'">0</td>
+                            <td>
+                                <span th:if="${r.paymentMethod == 'wechat'}" class="badge badge-success">微信</span>
+                                <span th:if="${r.paymentMethod == 'alipay'}" class="badge badge-info">支付宝</span>
+                                <span th:if="${r.paymentMethod == 'bank'}" class="badge badge-warning">转账</span>
+                                <span th:if="${r.paymentMethod == 'usdt'}" class="badge badge-info">USDT</span>
+                            </td>
+                            <td>
+                                <span th:if="${r.status.name() == 'PENDING'}" class="badge badge-warning">⏳ 待审核</span>
+                                <span th:if="${r.status.name() == 'SUCCESS'}" class="badge badge-success">✅ 已到账</span>
+                                <span th:if="${r.status.name() == 'FAILED'}" class="badge badge-error">❌ 已拒绝</span>
+                            </td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+
+<script>
+    function highlight(el) {
+        document.querySelectorAll('.amount-btn').forEach(b => b.classList.remove('selected'));
+        el.classList.add('selected');
+    }
+</script>
+</body>
+</html>

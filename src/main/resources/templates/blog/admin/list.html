@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Blog Management - ToolBase Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.navbar{background:#1e293b;border-bottom:1px solid #334155;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.navbar-brand{font-size:20px;font-weight:700;color:#38bdf8;text-decoration:none}.navbar-brand span{color:#818cf8}
+.container{max-width:1200px;margin:0 auto;padding:24px}
+h1{font-size:22px;margin-bottom:20px}
+.btn{display:inline-flex;align-items:center;gap:4px;padding:8px 16px;border:none;border-radius:8px;font-size:13px;font-weight:600;cursor:pointer;text-decoration:none}
+.btn-primary{background:#38bdf8;color:#0f172a}.btn-sm{padding:6px 12px;font-size:11px}
+.btn-danger{background:#ef4444;color:white}.btn-success{background:#4ade80;color:#0f172a}
+.btn-warning{background:#f59e0b;color:#0f172a}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:10px 12px;border-bottom:2px solid #334155;color:#64748b;font-weight:600;font-size:11px;text-transform:uppercase}
+td{padding:10px 12px;border-bottom:1px solid #1e293b}
+tr:hover td{background:#0f172a40}
+.badge{display:inline-block;padding:2px 6px;border-radius:4px;font-size:10px;font-weight:600}
+.badge-success{background:#14532d;color:#4ade80}.badge-warning{background:#451a03;color:#fb923c}
+.flex{display:flex}.gap-2{gap:8px}
+.flex-between{display:flex;justify-content:space-between;align-items:center;margin-bottom:16px}
+</style>
+</head>
+<body>
+<nav class="navbar">
+<a href="/admin" class="navbar-brand">🦅 Tool<span>Base</span> Admin</a>
+<div class="nav-links"><a href="/admin">Dashboard</a><a href="/admin/blog" class="active">Blog</a></div>
+</nav>
+<div class="container">
+<div class="flex-between"><h1>📝 Blog Posts</h1><div class="flex" style="gap:8px"><a href="/admin/blog/analytics" class="btn btn-primary">📊 Analytics</a><a href="/admin/blog/new" class="btn btn-primary">+ New Post</a></div></div>
+<div class="card">
+<table>
+<thead><tr><th>Title</th><th>Category</th><th>Views</th><th>Ads</th><th>Date</th><th>Actions</th></tr></thead>
+<tbody>
+<tr th:each="p : ${posts}">
+<td><a th:href="@{/blog/{slug}(slug=${p.slug})}" style="color:#38bdf8;text-decoration:none;font-weight:600" th:text="${p.title}">Title</a></td>
+<td th:text="${p.category}" style="color:#94a3b8;font-size:12px">cat</td>
+<td th:text="${p.viewCount}">0</td>
+<td>
+<form method="post" th:action="@{/admin/blog/toggle-ad/{id}(id=${p.id})}" style="display:inline">
+<button type="submit" class="badge" th:classappend="${p.adEnabled} ? 'badge-success' : 'badge-warning'"
+th:text="${p.adEnabled} ? 'ON' : 'OFF'"></button>
+</form>
+</td>
+<td style="color:#64748b;font-size:11px" th:text="${#temporals.format(p.createdAt, 'yyyy-MM-dd')}">date</td>
+<td class="flex gap-2">
+<a th:href="@{/admin/blog/edit/{id}(id=${p.id})}" class="btn btn-sm btn-warning">Edit</a>
+<form method="post" th:action="@{/admin/blog/delete/{id}(id=${p.id})}" style="display:inline" onsubmit="return confirm('Delete this post?')">
+<button type="submit" class="btn btn-sm btn-danger">Delete</button>
+</form>
+</td>
+</tr>
+</tbody>
+</table>
+</div>
+</div>
+</body>
+</html>

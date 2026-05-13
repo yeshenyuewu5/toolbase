@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en" xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title th:text="|${post.title} - ToolBase Blog|">Post Title</title>
+<meta name="description" th:content="${post.excerpt}">
+<meta name="keywords" th:content="${post.keywords}">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.navbar{background:#1e293b;border-bottom:1px solid #334155;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.navbar-brand{font-size:20px;font-weight:700;color:#38bdf8;text-decoration:none}.navbar-brand span{color:#818cf8}
+.nav-links{display:flex;gap:4px}.nav-links a{padding:8px 16px;border-radius:8px;color:#94a3b8;text-decoration:none;font-size:14px;font-weight:500}
+.nav-links a.active{background:#38bdf8;color:#0f172a}
+.container{max-width:800px;margin:0 auto;padding:24px}
+.post-header{margin-bottom:24px}
+.post-header .cat{font-size:12px;color:#38bdf8;font-weight:600;text-transform:uppercase}
+.post-header h1{font-size:28px;font-weight:800;margin:8px 0;line-height:1.3}
+.post-header .meta{font-size:13px;color:#64748b}
+.post-body{font-size:15px;line-height:1.8;color:#cbd5e1}
+.post-body p{margin-bottom:16px}
+.post-body h2{font-size:20px;font-weight:700;margin:28px 0 12px;color:#f1f5f9}
+.post-body h3{font-size:17px;font-weight:600;margin:20px 0 10px;color:#e2e8f0}
+.post-body ul,.post-body ol{padding-left:20px;margin-bottom:16px}
+.post-body li{margin-bottom:6px}
+.post-body strong{color:#f1f5f9}
+.post-body a{color:#38bdf8}
+.ad-slot{min-height:60px;margin:20px 0}
+.tags{display:flex;gap:6px;flex-wrap:wrap;margin-top:16px}
+.tags span{padding:4px 10px;background:#0f172a;border:1px solid #334155;border-radius:6px;font-size:11px;color:#64748b}
+.related-title{font-size:18px;font-weight:600;margin:24px 0 12px}
+.related-grid{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.related-card{padding:14px;background:#1e293b;border:1px solid #334155;border-radius:10px;text-decoration:none;color:#e2e8f0;transition:.2s}
+.related-card:hover{border-color:#38bdf8}
+.related-card h4{font-size:14px;font-weight:600;margin-bottom:4px}
+.related-card .meta{font-size:11px;color:#475569}
+.footer{text-align:center;padding:20px;color:#475569;font-size:12px;border-top:1px solid #1e293b;margin-top:32px}
+.right-bar{display:flex;align-items:center;gap:10px}
+.lang-btn{padding:4px 8px;border:1px solid #334155;border-radius:6px;background:transparent;color:#94a3b8;font-size:11px;text-decoration:none}
+.lang-btn.active{background:#38bdf8;color:#0f172a;border-color:#38bdf8}
+@media(max-width:640px){.related-grid{grid-template-columns:1fr}}
+</style>
+</head>
+<body>
+<nav class="navbar">
+<a href="/tools" class="navbar-brand">🦅 Tool<span>Base</span></a>
+<div class="nav-links"><a href="/blog" class="active">Blog</a><a href="/tools">Tools</a></div>
+<div class="nav-links"><a href="/tools">Tools</a><a href="/blog">Blog</a><a href="/blog" class="active">Article</a></div>
+<div class="right-bar">
+<a th:href="@{/blog/{slug}(slug=${post.slug}, lang='en')}" class="lang-btn" th:classappend="${#locale.language == 'en' ? 'active' : ''}">EN</a>
+<a th:href="@{/blog/{slug}(slug=${post.slug}, lang='zh')}" class="lang-btn" th:classappend="${#locale.language == 'zh' ? 'active' : ''}">中文</a>
+</div>
+</nav>
+<div class="container">
+<div class="post-header">
+<div class="cat" th:text="${post.category}">Category</div>
+<h1 th:text="${post.title}">Post Title</h1>
+<div class="meta">By <span th:text="${post.author}">Author</span> · <span th:text="${#temporals.format(post.createdAt, 'MMMM dd, yyyy')}">date</span> · <span th:text="${post.viewCount}">0</span> views</div>
+<div class="tags" th:if="${post.tagArray.length > 0}">
+<span th:each="tag : ${post.tagArray}" th:text="${tag}">tag</span>
+</div>
+</div>
+
+
+
+<!-- Ad: Before Content -->
+<!-- Ad slot: add Google AdSense code here when ready -->
+<div th:if="${post.adEnabled && post.adBeforeContent}" id="ad-before-${post.id}" class="ad-slot"></div>
+
+<!-- Store content in a hidden script tag for JS to process -->
+<script id="rawContent" type="text/plain" th:text="${post.content}"></script>
+<div class="post-body" id="postContent">
+</div>
+<script>
+// Format content - convert markdown-like formatting to HTML
+function renderContent(text) {
+  if (!text) return '';
+  // Escape HTML
+  let html = text.replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;');
+  // Headings: ## Heading
+  html = html.replace(/^## (.+)$/gm, '<h2>$1</h2>');
+  // Bold: **text**
+  html = html.replace(/\*\*(.+?)\*\*/g, '<strong>$1</strong>');
+  // Lists: - item
+  html = html.replace(/^- (.+)$/gm, '<li>$1</li>');
+  // Wrap consecutive <li> in <ul>
+  html = html.replace(/(<li>.*?\n?)+/g, function(m) {
+    return '<ul>' + m.trim().replace(/\n/g, '') + '</ul>';
+  });
+  // Paragraphs: double newlines
+  html = html.replace(/\n\n/g, '</p><p>');
+  // Single newlines to <br>
+  html = html.replace(/\n/g, '<br>');
+  // Wrap in <p>
+  html = '<p>' + html + '</p>';
+  // Fix nested <p><ul>
+  html = html.replace(/<p><ul>/g, '<ul>').replace(/<ul><\/p>/g, '</ul>');
+  // Fix <p><h2>
+  html = html.replace(/<p><h2>/g, '<h2>').replace(/<\/h2><\/p>/g, '</h2>');
+  // Fix empty paragraphs
+  html = html.replace(/<p><br><\/p>/g, '').replace(/<p>\s*<\/p>/g, '');
+  return html;
+}
+const rc = document.getElementById('rawContent');
+const pc = document.getElementById('postContent');
+pc.innerHTML = renderContent(rc ? rc.textContent : '');
+</script>
+
+<!-- Ad: After Content -->
+<!-- Ad slot: add Google AdSense code here when ready -->
+<div th:if="${post.adEnabled && post.adAfterContent}" id="ad-after-${post.id}" class="ad-slot"></div>
+
+<div class="related-title" th:if="${related.size() > 0}">Related Articles</div>
+<div class="related-grid" th:if="${related.size() > 0}">
+<a th:each="r : ${related}" th:href="@{/blog/{slug}(slug=${r.slug})}" class="related-card">
+<h4 th:text="${r.title}">Title</h4>
+<div class="meta" th:text="${r.category}">Category</div>
+</a>
+</div>
+</div>
+<div class="footer"><p>ToolBase — AI Tools Blog</p></div>
+<script>
+// Content formatting: convert double newlines to paragraphs
+document.querySelector('.post-body').innerHTML = document.querySelector('.post-body').innerHTML
+  .replace(/\\n\\n/g, '</p><p>').replace(/\\n/g, '<br>');
+</script>
+</body>
+</html>

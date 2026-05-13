@@ -1,0 +1,57 @@
+server:
+  port: 8080
+
+spring:
+  datasource:
+    url: jdbc:postgresql://localhost:5432/tokenplatform
+    username: tokenadmin
+    password: ${DB_PASSWORD:changeme}
+    hikari:
+      maximum-pool-size: 10
+      minimum-idle: 5
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQL10Dialect
+        format_sql: true
+  redis:
+    host: localhost
+    port: 6379
+    timeout: 3000ms
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+
+# JWT Configuration
+app:
+  jwt:
+    secret: ${JWT_SECRET:ReplaceWithYourOwnSecretKeyThatIs256BitsLong}
+    expiration-ms: 86400000
+  # Default upstream API key for DeepSeek (user will replace)
+  upstream:
+    deepseek:
+      api-url: https://api.deepseek.com/v1/chat/completions
+      api-key: ${DEEPSEEK_API_KEY:sk-placeholder}
+      model: deepseek-chat
+      # Cost per 1K tokens (in RMB fen/cents for easy calculation)
+      cost-input: 0.07
+      cost-output: 0.28
+    openai:
+      api-url: https://api.openai.com/v1/chat/completions
+      api-key: ${OPENAI_API_KEY:sk-placeholder}
+      # Cost per 1K tokens (converted to RMB fen)
+      cost-input: 1.25
+      cost-output: 5.00
+  # Pricing to end users (in RMB fen/cents per 1K tokens)
+  pricing:
+    markup-ratio: 1.5
+  # Default balances for new users (fen/cents)
+  default-free-balance: 500
+
+logging:
+  level:
+    com.tokenplatform: INFO

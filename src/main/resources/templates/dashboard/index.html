@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>控制台 - ToolBase</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        .navbar { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #38bdf8; text-decoration: none; }
+        .navbar-brand span { color: #818cf8; }
+        .navbar-user { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .navbar-user .balance { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 8px; color: #4ade80; font-weight: 600; }
+        .navbar-user .username { color: #94a3b8; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a { padding: 8px 16px; border-radius: 8px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; transition: all 0.15s; }
+        .nav-links a:hover { background: #334155; color: #e2e8f0; }
+        .nav-links a.active { background: #38bdf8; color: #0f172a; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; transition: all 0.15s; }
+        .btn-primary { background: #38bdf8; color: #0f172a; }
+        .btn-primary:hover { background: #7dd3fc; }
+        .btn-success { background: #4ade80; color: #0f172a; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-danger:hover { background: #f87171; }
+        .btn-warning { background: #f59e0b; color: #0f172a; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        .card-header { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #f1f5f9; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        .stat-label { font-size: 13px; color: #64748b; margin-top: 4px; }
+        .stat-blue .stat-value { color: #38bdf8; }
+        .stat-green .stat-value { color: #4ade80; }
+        .stat-purple .stat-value { color: #818cf8; }
+        .stat-orange .stat-value { color: #fb923c; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #334155; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 10px 12px; border-bottom: 1px solid #1e293b; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: #14532d; color: #4ade80; }
+        .badge-error { background: #450a0a; color: #f87171; }
+        .badge-info { background: #0c4a6e; color: #38bdf8; }
+        .badge-warning { background: #451a03; color: #fb923c; }
+        .form-input { width: 100%; padding: 10px 14px; border: 1px solid #334155; border-radius: 8px; background: #0f172a; color: #e2e8f0; font-size: 14px; outline: none; }
+        .form-input:focus { border-color: #38bdf8; }
+        .api-key-text { font-family: 'SF Mono', 'Fira Code', monospace; font-size: 13px; background: #0f172a; padding: 6px 10px; border-radius: 6px; color: #38bdf8; user-select: all; cursor: copy; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .flex { display: flex; }
+        .gap-2 { gap: 8px; }
+        .mb-4 { margin-bottom: 16px; }
+        .mt-4 { margin-top: 16px; }
+        .copied-toast { position: fixed; bottom: 24px; left: 50%; transform: translateX(-50%); background: #4ade80; color: #0f172a; padding: 10px 20px; border-radius: 8px; font-size: 14px; font-weight: 500; display: none; z-index: 1000; }
+        .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 16px; }
+        @media (max-width: 768px) { .grid-4, .grid-2 { grid-template-columns: 1fr; } }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">🦅 Tool<span>Base</span></a>
+    <div class="navbar-user">
+        <div class="nav-links">
+            <a href="/dashboard" class="active">控制台</a>
+            <a href="/recharge">充值</a>
+            <a sec:authorize="hasAuthority('ADMIN')" href="/admin">管理</a>
+        </div>
+        <span class="balance" th:if="${user != null}">¥<span th:text="${#numbers.formatDecimal(user.balance / 100.0, 1, 2)}">0.00</span></span>
+        <span class="username" sec:authentication="name">user</span>
+        <form method="post" th:action="@{/auth/logout}" style="display:inline">
+            <button type="submit" class="btn btn-sm btn-danger">退出</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <h2 style="font-size: 22px; margin-bottom: 8px;">控制台</h2>
+    <p style="color: #64748b; font-size: 14px; margin-bottom: 24px;">
+        欢迎回来，<span th:text="${user.displayName != null ? user.displayName : user.username}"></span>
+    </p>
+
+    <div class="grid-4 mb-4">
+        <div class="card stat-blue">
+            <div class="stat-value" th:text="${#numbers.formatDecimal(user.balance / 100.0, 1, 2)} + ' ¥'">0.00</div>
+            <div class="stat-label">账户余额</div>
+        </div>
+        <div class="card stat-green">
+            <div class="stat-value" th:text="${#numbers.formatDecimal(totalCost / 100.0, 1, 2)} + ' ¥'">0.00</div>
+            <div class="stat-label">总消费</div>
+        </div>
+        <div class="card stat-purple">
+            <div class="stat-value" th:text="${apiKeys != null ? #lists.size(apiKeys) : 0}">0</div>
+            <div class="stat-label">API Keys</div>
+        </div>
+        <div class="card stat-orange">
+            <div class="stat-value" th:text="${recentUsage != null ? #lists.size(recentUsage) : 0}">0</div>
+            <div class="stat-label">最近请求</div>
+        </div>
+    </div>
+
+    <div class="card mb-4">
+        <div class="flex-between">
+            <div class="card-header">API Keys</div>
+            <form method="post" th:action="@{/dashboard/apikey/create}" style="display:flex;gap:8px;align-items:center;">
+                <input type="text" name="name" class="form-input" style="width:180px;padding:6px 10px;" placeholder="Key 名称">
+                <button type="submit" class="btn btn-primary btn-sm">+ 新建 Key</button>
+            </form>
+        </div>
+
+        <div th:if="${apiKeys == null || #lists.isEmpty(apiKeys)}" class="empty-state">
+            <h3>还没有 API Key</h3>
+            <p>创建一个 Key 来开始使用 AI Token API</p>
+        </div>
+
+        <table th:if="${apiKeys != null && !#lists.isEmpty(apiKeys)}">
+            <thead>
+                <tr>
+                    <th>名称</th>
+                    <th>API Key</th>
+                    <th>状态</th>
+                    <th>创建时间</th>
+                    <th>操作</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="key : ${apiKeys}">
+                    <td th:text="${key.name != null ? key.name : 'Default'}">Key 1</td>
+                    <td><span class="api-key-text" th:text="${key.keyValue}">sk-xxxx</span></td>
+                    <td>
+                        <span th:if="${key.enabled}" class="badge badge-success">启用</span>
+                        <span th:unless="${key.enabled}" class="badge badge-error">禁用</span>
+                    </td>
+                    <td style="color:#64748b;font-size:12px;" th:text="${#temporals.format(key.createdAt, 'yyyy-MM-dd HH:mm')}">date</td>
+                    <td>
+                        <div class="flex gap-2">
+                            <form method="post" th:action="@{/dashboard/apikey/toggle/{id}(id=${key.id})}">
+                                <button type="submit" class="btn btn-sm btn-warning" th:text="${key.enabled} ? '禁用' : '启用'"></button>
+                            </form>
+                            <form method="post" th:action="@{/dashboard/apikey/delete/{id}(id=${key.id})}" onsubmit="return confirm('确定删除此 API Key？')">
+                                <button type="submit" class="btn btn-sm btn-danger">删除</button>
+                            </form>
+                        </div>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="card">
+        <div class="card-header">最近使用记录</div>
+        <div th:if="${recentUsage == null || #lists.isEmpty(recentUsage)}" class="empty-state">
+            <h3>暂无使用记录</h3>
+            <p>调用 API 后，使用记录会显示在这里</p>
+        </div>
+        <table th:if="${recentUsage != null && !#lists.isEmpty(recentUsage)}">
+            <thead>
+                <tr>
+                    <th>时间</th>
+                    <th>模型</th>
+                    <th>输入 Token</th>
+                    <th>输出 Token</th>
+                    <th>费用</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="record : ${recentUsage}">
+                    <td style="color:#64748b;font-size:12px;" th:text="${#temporals.format(record.createdAt, 'HH:mm:ss')}">time</td>
+                    <td th:text="${record.model}">model</td>
+                    <td th:text="${record.inputTokens}">0</td>
+                    <td th:text="${record.outputTokens}">0</td>
+                    <td style="color:#f87171;" th:text="${#numbers.formatDecimal(record.costFen / 100.0, 1, 4)} + ' ¥'">0</td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<div id="copiedToast" class="copied-toast">✅ 已复制</div>
+<script>
+    document.addEventListener('click', function(e) {
+        const el = e.target.closest('.api-key-text');
+        if (el) {
+            navigator.clipboard.writeText(el.textContent.trim()).then(() => {
+                const toast = document.getElementById('copiedToast');
+                toast.style.display = 'block';
+                setTimeout(() => { toast.style.display = 'none'; }, 2000);
+            });
+        }
+    });
+</script>
+</body>
+</html>

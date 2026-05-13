@@ -1,0 +1,90 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>用户管理 - ToolBase</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        .navbar { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #38bdf8; text-decoration: none; }
+        .navbar-brand span { color: #818cf8; }
+        .navbar-user .username { color: #94a3b8; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a { padding: 8px 16px; border-radius: 8px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .nav-links a.active { background: #38bdf8; color: #0f172a; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; }
+        .btn-primary { background: #38bdf8; color: #0f172a; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .mb-4 { margin-bottom: 16px; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #334155; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase; }
+        td { padding: 10px 12px; border-bottom: 1px solid #1e293b; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: #14532d; color: #4ade80; }
+        .badge-error { background: #450a0a; color: #f87171; }
+        .badge-info { background: #0c4a6e; color: #38bdf8; }
+        .badge-warning { background: #451a03; color: #fb923c; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">🦅 Tool<span>Base</span></a>
+    <div class="navbar-user" style="display:flex;align-items:center;gap:16px;">
+        <div class="nav-links">
+            <a href="/admin">管理后台</a>
+        </div>
+        <span class="username" sec:authentication="name">admin</span>
+        <form method="post" th:action="@{/auth/logout}" style="display:inline">
+            <button type="submit" class="btn btn-sm btn-danger">退出</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container">
+    <div class="flex-between mb-4">
+        <h2 style="font-size: 22px;">用户管理</h2>
+        <a href="/admin" class="btn btn-sm btn-primary">← 返回</a>
+    </div>
+
+    <div class="card">
+        <table>
+            <thead>
+                <tr>
+                    <th>ID</th>
+                    <th>用户名</th>
+                    <th>显示名称</th>
+                    <th>邮箱</th>
+                    <th>余额</th>
+                    <th>角色</th>
+                    <th>注册时间</th>
+                    <th>状态</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr th:each="u : ${users}">
+                    <td th:text="${u.id}">1</td>
+                    <td th:text="${u.username}">user</td>
+                    <td th:text="${u.displayName != null ? u.displayName : '-'}">-</td>
+                    <td style="font-size:12px;color:#64748b;" th:text="${u.email != null ? u.email : '-'}">-</td>
+                    <td style="color:#4ade80;font-weight:600;" th:text="${#numbers.formatDecimal(u.balance / 100.0, 1, 2)} + ' ¥'">0</td>
+                    <td>
+                        <span th:if="${u.role.name() == 'ADMIN'}" class="badge badge-warning">管理员</span>
+                        <span th:unless="${u.role.name() == 'ADMIN'}" class="badge badge-info">用户</span>
+                    </td>
+                    <td style="color:#64748b;font-size:12px;" th:text="${#temporals.format(u.createdAt, 'yyyy-MM-dd')}">date</td>
+                    <td>
+                        <span th:if="${u.enabled}" class="badge badge-success">正常</span>
+                        <span th:unless="${u.enabled}" class="badge badge-error">禁用</span>
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

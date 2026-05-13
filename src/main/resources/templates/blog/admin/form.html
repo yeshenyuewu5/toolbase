@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title th:text="${post.id != null} ? 'Edit Post' : 'New Post' + ' - ToolBase Admin'">Post Form</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.navbar{background:#1e293b;border-bottom:1px solid #334155;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.navbar-brand{font-size:20px;font-weight:700;color:#38bdf8;text-decoration:none}.navbar-brand span{color:#818cf8}
+.container{max-width:900px;margin:0 auto;padding:24px}
+h1{font-size:22px;margin-bottom:20px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:24px}
+.form-group{margin-bottom:16px}
+.form-group label{display:block;font-size:12px;color:#94a3b8;margin-bottom:4px;font-weight:500;text-transform:uppercase}
+.form-input{width:100%;padding:10px 14px;border:1px solid #334155;border-radius:8px;background:#0f172a;color:#e2e8f0;font-size:14px;outline:none}
+.form-input:focus{border-color:#38bdf8}
+textarea.form-input{min-height:400px;font-family:monospace;font-size:13px;resize:vertical}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:12px}
+.chk-row{display:flex;gap:16px;margin:12px 0;flex-wrap:wrap}
+.chk-row label{font-size:13px;color:#94a3b8;display:flex;align-items:center;gap:4px;cursor:pointer}
+.btn{padding:10px 24px;border:none;border-radius:8px;font-size:14px;font-weight:600;cursor:pointer}
+.btn-primary{background:#38bdf8;color:#0f172a}.btn-ghost{background:#334155;color:#e2e8f0}
+</style>
+</head>
+<body>
+<nav class="navbar">
+<a href="/admin" class="navbar-brand">🦅 Tool<span>Base</span> Admin</a>
+<div class="nav-links"><a href="/admin">Dashboard</a><a href="/admin/blog">Blog</a></div>
+</nav>
+<div class="container">
+<h1 th:text="${post.id != null} ? '✏️ Edit Post' : '📝 New Post'">New Post</h1>
+<div class="card">
+<form method="post" th:action="@{/admin/blog/save}">
+<input type="hidden" name="id" th:value="${post.id}">
+<div class="grid-2">
+<div class="form-group"><label>Title</label><input type="text" name="title" class="form-input" th:value="${post.title}" required></div>
+<div class="form-group"><label>Slug (leave empty to auto-generate)</label><input type="text" name="slug" class="form-input" th:value="${post.slug}" placeholder="auto-generated"></div>
+</div>
+<div class="grid-2">
+<div class="form-group"><label>Category</label><input type="text" name="category" class="form-input" th:value="${post.category}" placeholder="e.g. AI Writing"></div>
+<div class="form-group"><label>Author</label><input type="text" name="author" class="form-input" th:value="${post.author}" placeholder="ToolBase"></div>
+</div>
+<div class="form-group"><label>Excerpt (SEO description)</label><input type="text" name="excerpt" class="form-input" th:value="${post.excerpt}"></div>
+<div class="form-group"><label>Keywords (comma-separated)</label><input type="text" name="keywords" class="form-input" th:value="${post.keywords}"></div>
+<div class="form-group"><label>Tags (comma-separated)</label><input type="text" name="tags" class="form-input" th:value="${post.tags}"></div>
+<div class="form-group"><label>Content (HTML)</label><textarea name="content" class="form-input" th:text="${post.content}"></textarea></div>
+<div class="chk-row">
+<label><input type="checkbox" name="adEnabled" value="true" th:checked="${post.adEnabled != false}"> Ads Enabled</label>
+<label><input type="checkbox" name="adBeforeContent" value="true" th:checked="${post.adBeforeContent != false}"> Ad Before Content</label>
+<label><input type="checkbox" name="adAfterContent" value="true" th:checked="${post.adAfterContent != false}"> Ad After Content</label>
+<label><input type="checkbox" name="adMidContent" value="true" th:checked="${post.adMidContent}"> Ad Mid-Content</label>
+</div>
+<div style="display:flex;gap:8px;margin-top:16px">
+<button type="submit" class="btn btn-primary">💾 Save</button>
+<a href="/admin/blog" class="btn btn-ghost" style="text-decoration:none">Cancel</a>
+</div>
+</form>
+</div>
+</div>
+</body>
+</html>

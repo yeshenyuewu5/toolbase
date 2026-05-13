@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1.0">
+<title>Blog Analytics - ToolBase Admin</title>
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,sans-serif;background:#0f172a;color:#e2e8f0;min-height:100vh}
+.navbar{background:#1e293b;border-bottom:1px solid #334155;padding:0 24px;height:60px;display:flex;align-items:center;justify-content:space-between}
+.navbar-brand{font-size:20px;font-weight:700;color:#38bdf8;text-decoration:none}.navbar-brand span{color:#818cf8}
+.container{max-width:1100px;margin:0 auto;padding:24px}
+h1{font-size:22px;margin-bottom:20px}
+.stat-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(200px,1fr));gap:14px;margin-bottom:24px}
+.stat-card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;text-align:center}
+.stat-value{font-size:30px;font-weight:800;background:linear-gradient(135deg,#38bdf8,#818cf8);-webkit-background-clip:text;-webkit-text-fill-color:transparent}
+.stat-label{font-size:12px;color:#64748b;margin-top:4px}
+.card{background:#1e293b;border:1px solid #334155;border-radius:12px;padding:20px;margin-bottom:16px}
+.card-title{font-size:15px;font-weight:600;margin-bottom:12px;color:#f1f5f9}
+table{width:100%;border-collapse:collapse;font-size:13px}
+th{text-align:left;padding:8px 10px;border-bottom:2px solid #334155;color:#64748b;font-weight:600;font-size:11px;text-transform:uppercase}
+td{padding:8px 10px;border-bottom:1px solid #1e293b}
+tr:hover td{background:#0f172a40}
+.rank{color:#475569;font-weight:700;width:30px}
+.cat-bar{display:flex;align-items:center;gap:8px;margin:4px 0}
+.cat-bar .cat-name{width:120px;font-size:13px;color:#94a3b8}
+.cat-bar .bar-fill{height:20px;border-radius:4px;background:linear-gradient(90deg,#38bdf8,#818cf8);min-width:4px}
+.cat-bar .bar-val{font-size:12px;color:#64748b;margin-left:4px}
+.btn{padding:6px 14px;border:none;border-radius:6px;font-size:12px;font-weight:600;cursor:pointer;text-decoration:none;display:inline-block}
+.btn-primary{background:#38bdf8;color:#0f172a}.btn-ghost{background:#334155;color:#e2e8f0}
+.footer{text-align:center;padding:20px;color:#475569;font-size:12px;border-top:1px solid #1e293b;margin-top:32px}
+</style>
+</head>
+<body>
+<nav class="navbar">
+<a href="/admin" class="navbar-brand">🦅 Tool<span>Base</span> Admin</a>
+<div><a href="/admin/blog" class="btn btn-ghost" style="text-decoration:none">← Blog Posts</a></div>
+</nav>
+<div class="container">
+<h1>📊 Blog Analytics</h1>
+
+<div class="stat-grid">
+<div class="stat-card"><div class="stat-value" th:text="${totalPosts}">0</div><div class="stat-label">Total Articles</div></div>
+<div class="stat-card"><div class="stat-value" th:text="${totalViews}">0</div><div class="stat-label">Total Views</div></div>
+<div class="stat-card"><div class="stat-value" th:text="${adsEnabled}">0</div><div class="stat-label">Ads Enabled</div></div>
+<div class="stat-card"><div class="stat-value" th:text="${adsDisabled}">0</div><div class="stat-label">Ads Disabled</div></div>
+<div class="stat-card"><div class="stat-value" th:text="${lastWeek}">0</div><div class="stat-label">New (7 days)</div></div>
+<div class="stat-card"><div class="stat-value" th:text="${totalPosts > 0 ? #numbers.formatDecimal(totalViews/totalPosts, 1, 1) : 0}">0</div><div class="stat-label">Avg Views/Article</div></div>
+</div>
+
+<div class="card" th:if="${!byCategory.isEmpty()}">
+<div class="card-title">📂 Articles by Category</div>
+<th:block th:each="entry : ${byCategory}">
+<div class="cat-bar">
+<span class="cat-name" th:text="${entry.key}">Category</span>
+<div class="bar-fill" th:style="'width:' + (${entry.value} * 100 / ${totalPosts}) + '%'" th:title="${entry.value} + ' posts'"></div>
+<span class="bar-val" th:text="${entry.value}">0</span>
+</div>
+</th:block>
+</div>
+
+<div class="card" th:if="${!topViewed.isEmpty()}">
+<div class="card-title">🔥 Top 10 Most Viewed</div>
+<table>
+<thead><tr><th>#</th><th>Title</th><th>Category</th><th>Views</th><th>Ads</th></tr></thead>
+<tbody>
+<tr th:each="p, stat : ${topViewed}">
+<td class="rank" th:text="${stat.index + 1}">1</td>
+<td><a th:href="@{/admin/blog/edit/{id}(id=${p.id})}" style="color:#38bdf8;text-decoration:none" th:text="${p.title}">Title</a></td>
+<td style="color:#94a3b8;font-size:12px" th:text="${p.category}">cat</td>
+<td style="font-weight:600" th:text="${p.viewCount}">0</td>
+<td th:text="${p.adEnabled} ? '📢 ON' : '📢 OFF'" th:style="${p.adEnabled} ? 'color:#4ade80' : 'color:#475569'"></td>
+</tr>
+</tbody>
+</table>
+</div>
+
+<div class="footer"><p>ToolBase Blog Analytics</p></div>
+</div>
+</body>
+</html>

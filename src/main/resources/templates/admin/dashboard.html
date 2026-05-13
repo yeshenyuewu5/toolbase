@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org" xmlns:sec="http://www.thymeleaf.org/extras/spring-security">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>管理后台 - ToolBase</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #0f172a; color: #e2e8f0; min-height: 100vh; }
+        .navbar { background: #1e293b; border-bottom: 1px solid #334155; padding: 0 24px; height: 60px; display: flex; align-items: center; justify-content: space-between; }
+        .navbar-brand { font-size: 20px; font-weight: 700; color: #38bdf8; text-decoration: none; }
+        .navbar-brand span { color: #818cf8; }
+        .navbar-user { display: flex; align-items: center; gap: 16px; font-size: 14px; }
+        .navbar-user .balance { background: #0f172a; border: 1px solid #334155; padding: 6px 14px; border-radius: 8px; color: #4ade80; font-weight: 600; }
+        .navbar-user .username { color: #94a3b8; }
+        .nav-links { display: flex; gap: 4px; }
+        .nav-links a { padding: 8px 16px; border-radius: 8px; color: #94a3b8; text-decoration: none; font-size: 14px; font-weight: 500; }
+        .nav-links a:hover { background: #334155; color: #e2e8f0; }
+        .nav-links a.active { background: #38bdf8; color: #0f172a; }
+        .container { max-width: 1200px; margin: 0 auto; padding: 24px; }
+        .btn { display: inline-flex; align-items: center; gap: 6px; padding: 8px 16px; border: none; border-radius: 8px; font-size: 14px; font-weight: 500; cursor: pointer; text-decoration: none; }
+        .btn-primary { background: #38bdf8; color: #0f172a; }
+        .btn-primary:hover { background: #7dd3fc; }
+        .btn-warning { background: #f59e0b; color: #0f172a; }
+        .btn-success { background: #4ade80; color: #0f172a; }
+        .btn-danger { background: #ef4444; color: white; }
+        .btn-sm { padding: 6px 12px; font-size: 12px; }
+        .card { background: #1e293b; border: 1px solid #334155; border-radius: 12px; padding: 20px; }
+        .card-header { font-size: 16px; font-weight: 600; margin-bottom: 16px; color: #f1f5f9; }
+        .grid-4 { display: grid; grid-template-columns: repeat(4, 1fr); gap: 16px; }
+        .stat-value { font-size: 28px; font-weight: 700; }
+        .stat-label { font-size: 13px; color: #64748b; margin-top: 4px; }
+        .stat-blue .stat-value { color: #38bdf8; }
+        .stat-green .stat-value { color: #4ade80; }
+        .stat-purple .stat-value { color: #818cf8; }
+        .stat-orange .stat-value { color: #fb923c; }
+        table { width: 100%; border-collapse: collapse; font-size: 14px; }
+        th { text-align: left; padding: 10px 12px; border-bottom: 2px solid #334155; color: #64748b; font-weight: 600; font-size: 12px; text-transform: uppercase; letter-spacing: 0.5px; }
+        td { padding: 10px 12px; border-bottom: 1px solid #1e293b; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 6px; font-size: 11px; font-weight: 600; }
+        .badge-success { background: #14532d; color: #4ade80; }
+        .badge-error { background: #450a0a; color: #f87171; }
+        .badge-info { background: #0c4a6e; color: #38bdf8; }
+        .badge-warning { background: #451a03; color: #fb923c; }
+        .flex { display: flex; }
+        .flex-between { display: flex; justify-content: space-between; align-items: center; }
+        .gap-2 { gap: 8px; }
+        .gap-4 { gap: 16px; }
+        .mb-4 { margin-bottom: 16px; }
+        .empty-state { text-align: center; padding: 40px 20px; color: #64748b; }
+    </style>
+</head>
+<body>
+<nav class="navbar">
+    <a href="/dashboard" class="navbar-brand">🦅 Tool<span>Base</span></a>
+    <div class="navbar-user">
+        <div class="nav-links">
+            <a href="/dashboard">控制台</a>
+            <a href="/recharge">充值</a>
+            <a href="/admin" class="active">管理</a>
+        </div>
+        <span class="username" sec:authentication="name">admin</span>
+        <form method="post" th:action="@{/auth/logout}" style="display:inline">
+            <button type="submit" class="btn btn-sm btn-danger">退出</button>
+        </form>
+    </div>
+</nav>
+
+<div class="container" th:fragment="content">
+    <h2 style="font-size: 22px; margin-bottom: 24px;">管理后台</h2>
+
+    <div class="grid-4 mb-4">
+        <div class="card stat-blue">
+            <div class="stat-value" th:text="${userCount}">0</div>
+            <div class="stat-label">用户总数</div>
+        </div>
+        <div class="card stat-green">
+            <div class="stat-value" th:text="${totalRequests}">0</div>
+            <div class="stat-label">总请求数</div>
+        </div>
+        <div class="card stat-purple">
+            <div class="stat-value" th:text="${totalTokens}">0</div>
+            <div class="stat-label">总 Token</div>
+        </div>
+        <div class="card stat-orange">
+            <div class="stat-value" th:text="${pendingRecharges}">0</div>
+            <div class="stat-label">待处理充值</div>
+        </div>
+    </div>
+
+    <div class="flex gap-4" style="margin-top:16px;">
+        <a href="/admin/users" class="btn btn-primary">用户管理</a>
+        <a th:if="${pendingRecharges > 0}" href="/admin/recharges" class="btn btn-warning">
+            充值审核 (待处理: <span th:text="${pendingRecharges}">0</span>)
+        </a>
+        <a th:unless="${pendingRecharges > 0}" href="/admin/recharges" class="btn btn-primary">充值记录</a>
+    </div>
+</div>
+</body>
+</html>
